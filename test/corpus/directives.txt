@@ -1,0 +1,247 @@
+==================
+If-else block
+==================
+
+if (@Mode == "A")
+  +ConfigA = { Class = ConfigA }
+else
+  +ConfigB = { Class = ConfigB }
+end
+
+---
+
+(source_file
+  (directive
+    (if_block
+      condition: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (grouped_expression
+                            (expression
+                              (logical_or
+                                (logical_and
+                                  (comparison
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (variable_reference
+                                                  (identifier))))))))
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (string_literal))))))))))))))))))))))
+      (definition
+        (object_definition
+          name: (identifier)
+          body: (subnode
+            (definition
+              (field
+                name: (identifier)
+                value: (expression
+                  (logical_or
+                    (logical_and
+                      (comparison
+                        (concat
+                          (addition
+                            (multiplication
+                              (unary
+                                (bitwise
+                                  (primary
+                                    (identifier))))))))))))))))
+      (else_clause
+        (definition
+          (object_definition
+            name: (identifier)
+            body: (subnode
+              (definition
+                (field
+                  name: (identifier)
+                  value: (expression
+                    (logical_or
+                      (logical_and
+                        (comparison
+                          (concat
+                            (addition
+                              (multiplication
+                                (unary
+                                  (bitwise
+                                    (primary
+                                      (identifier))))))))))))))))))))
+
+==================
+Foreach block
+==================
+
+foreach Ch in @Channels
+  +Channel = { Index = @Ch }
+end
+
+---
+
+(source_file
+  (directive
+    (foreach_block
+      value: (identifier)
+      iterable: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (variable_reference
+                            (identifier))))))))))))
+      (definition
+        (object_definition
+          name: (identifier)
+          body: (subnode
+            (definition
+              (field
+                name: (identifier)
+                value: (expression
+                  (logical_or
+                    (logical_and
+                      (comparison
+                        (concat
+                          (addition
+                            (multiplication
+                              (unary
+                                (bitwise
+                                  (primary
+                                    (variable_reference
+                                      (identifier))))))))))))))))))))
+
+==================
+Template definition
+==================
+
+template DAQChannel(ID: int, Gain: float = 1.0)
+  +Channel = { Index = @ID }
+end
+
+---
+
+(source_file
+  (directive
+    (template_definition
+      name: (identifier)
+      (parameter_list
+        (parameter
+          name: (identifier)
+          type: (type_expression
+            (builtin_type)))
+        (parameter
+          name: (identifier)
+          type: (type_expression
+            (builtin_type))
+          default: (expression
+            (logical_or
+              (logical_and
+                (comparison
+                  (concat
+                    (addition
+                      (multiplication
+                        (unary
+                          (bitwise
+                            (primary
+                              (number)))))))))))))
+      (definition
+        (object_definition
+          name: (identifier)
+          body: (subnode
+            (definition
+              (field
+                name: (identifier)
+                value: (expression
+                  (logical_or
+                    (logical_and
+                      (comparison
+                        (concat
+                          (addition
+                            (multiplication
+                              (unary
+                                (bitwise
+                                  (primary
+                                    (variable_reference
+                                      (identifier))))))))))))))))))))
+
+==================
+Package declaration
+==================
+
+package MyPackage
+
+---
+
+(source_file
+  (package_declaration
+    uri: (package_uri
+      (identifier))))
+
+==================
+Variable declaration
+==================
+
+var MaxChannels: int = 8
+
+---
+
+(source_file
+  (directive
+    (var_declaration
+      name: (identifier)
+      type: (type_expression
+        (builtin_type))
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (number))))))))))))))
+
+==================
+Let declaration
+==================
+
+let Pi: float64 = 3.14159
+
+---
+
+(source_file
+  (directive
+    (let_declaration
+      name: (identifier)
+      type: (type_expression
+        (builtin_type))
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (number))))))))))))))

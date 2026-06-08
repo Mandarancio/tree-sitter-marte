@@ -1,0 +1,325 @@
+==================
+Object definition (+)
+==================
+
++StateMachine = { Class = StateMachine }
+
+---
+
+(source_file
+  (definition
+    (object_definition
+      name: (identifier)
+      body: (subnode
+        (definition
+          (field
+            name: (identifier)
+            value: (expression
+              (logical_or
+                (logical_and
+                  (comparison
+                    (concat
+                      (addition
+                        (multiplication
+                          (unary
+                            (bitwise
+                              (primary
+                                (identifier)))))))))))))))))
+
+==================
+Object definition ($)
+==================
+
+$Instance = { Class = ReferenceContainer }
+
+---
+
+(source_file
+  (definition
+    (object_definition
+      name: (identifier)
+      body: (subnode
+        (definition
+          (field
+            name: (identifier)
+            value: (expression
+              (logical_or
+                (logical_and
+                  (comparison
+                    (concat
+                      (addition
+                        (multiplication
+                          (unary
+                            (bitwise
+                              (primary
+                                (identifier)))))))))))))))))
+
+==================
+Nested objects
+==================
+
++App = {
+  Class = RealTimeApplication
+  +Functions = {
+    Class = ReferenceContainer
+  }
+}
+
+---
+
+(source_file
+  (definition
+    (object_definition
+      name: (identifier)
+      body: (subnode
+        (definition
+          (field
+            name: (identifier)
+            value: (expression
+              (logical_or
+                (logical_and
+                  (comparison
+                    (concat
+                      (addition
+                        (multiplication
+                          (unary
+                            (bitwise
+                              (primary
+                                (identifier)))))))))))))
+        (definition
+          (object_definition
+            name: (identifier)
+            body: (subnode
+              (definition
+                (field
+                  name: (identifier)
+                  value: (expression
+                    (logical_or
+                      (logical_and
+                        (comparison
+                          (concat
+                            (addition
+                              (multiplication
+                                (unary
+                                  (bitwise
+                                    (primary
+                                      (identifier))))))))))))))))))))
+
+==================
+Simple field
+==================
+
+ClassName = IOGAM
+
+---
+
+(source_file
+  (definition
+    (field
+      name: (identifier)
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (identifier))))))))))))))
+
+==================
+Field with number value
+==================
+
+MaxThreads = 8
+
+---
+
+(source_file
+  (definition
+    (field
+      name: (identifier)
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (number))))))))))))))
+
+==================
+Field with boolean value
+==================
+
+EnableLogging = true
+
+---
+
+(source_file
+  (definition
+    (field
+      name: (identifier)
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (boolean_literal))))))))))))))
+
+==================
+Field with string value
+==================
+
+Description = "Hello World"
+
+---
+
+(source_file
+  (definition
+    (field
+      name: (identifier)
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (string_literal))))))))))))))
+
+==================
+Signal shorthand
+==================
+
+ADC::Input1: uint32
+
+---
+
+(source_file
+  (definition
+    (signal_shorthand
+      datasource: (identifier)
+      signal: (identifier)
+      type: (type_expression
+        (builtin_type)))))
+
+==================
+Signal shorthand with alias and extra
+==================
+
+DAC::Output1: int16 as Out1 = { Gain = 2.5 }
+
+---
+
+(source_file
+  (definition
+    (signal_shorthand
+      datasource: (identifier)
+      signal: (identifier)
+      type: (type_expression
+        (builtin_type))
+      alias: (identifier)
+      extra: (subnode
+        (definition
+          (field
+            name: (identifier)
+            value: (expression
+              (logical_or
+                (logical_and
+                  (comparison
+                    (concat
+                      (addition
+                        (multiplication
+                          (unary
+                            (bitwise
+                              (primary
+                                (number)))))))))))))))))
+
+==================
+Object with multiple fields
+==================
+
++Config = {
+  Class = ConfigA
+  Mode = "fast"
+  Timeout = 30
+  Enabled = true
+}
+
+---
+
+(source_file
+  (definition
+    (object_definition
+      name: (identifier)
+      body: (subnode
+        (definition
+          (field
+            name: (identifier)
+            value: (expression
+              (logical_or
+                (logical_and
+                  (comparison
+                    (concat
+                      (addition
+                        (multiplication
+                          (unary
+                            (bitwise
+                              (primary
+                                (identifier)))))))))))))
+        (definition
+          (field
+            name: (identifier)
+            value: (expression
+              (logical_or
+                (logical_and
+                  (comparison
+                    (concat
+                      (addition
+                        (multiplication
+                          (unary
+                            (bitwise
+                              (primary
+                                (string_literal)))))))))))))
+        (definition
+          (field
+            name: (identifier)
+            value: (expression
+              (logical_or
+                (logical_and
+                  (comparison
+                    (concat
+                      (addition
+                        (multiplication
+                          (unary
+                            (bitwise
+                              (primary
+                                (number)))))))))))))
+        (definition
+          (field
+            name: (identifier)
+            value: (expression
+              (logical_or
+                (logical_and
+                  (comparison
+                    (concat
+                      (addition
+                        (multiplication
+                          (unary
+                            (bitwise
+                              (primary
+                                (boolean_literal)))))))))))))))))
