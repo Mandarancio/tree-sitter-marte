@@ -1,1 +1,16 @@
-cast_scalar = (uint32|"Parameters.freq1 / Parameters.freq2")
+var Channels: array = { 1 2 3 4 }
+
+template DAQChannel(ID: int, Gain: float = 1.0)
+  "+Channel_" .. @ID = {
+    Class = AnalogInput
+    Index = @ID
+    Scale = @Gain
+  }
+end
+
++DAQ = {
+  Class = ReferenceContainer
+  foreach Ch in @Channels
+    use DAQChannel Ch(ID = @Ch, Gain = (2.5 * @Ch))
+  end
+}

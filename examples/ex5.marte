@@ -1,50 +1,13 @@
-$TestApp = {
-    Class = RealTimeApplication
-    +Functions = {
-        Class = ReferenceContainer
-        +GAMTest = {
-            Class = IOGAM
-            InputSignals = {
-                Time = { // random comment
-                    Frequency = (uint32|"a//Parameters.freq") 
-                    DataSource = Timer
-                    Type = float64
-                }
-            }
-            OutputSignals = {
-                Time = {
-                    DataSource = DDB1
-                    Type = int32
-                }            
-            }
-        }
+package MyProject
+//! ignore(unused): This GAM is conditionally compiled
+//# My application entry point
+$App = {
+  Class = RealTimeApplication
+  +Data = {
+    Class = ReferenceContainer
+    DefaultDataSource = DDB1
+    +DDB1 = {
+      Class = GAMDataSource
     }
-    +Data = {
-        Class = ReferenceContainer
-        DefaultDataSource = DDB1
-        +DDB1 = {
-            Class = GAMDataSource
-       	}
-        +Timings = {
-            Class = TimingDataSource
-        }
-    }
-    +States = {
-        Class = ReferenceContainer
-        +State1 = {
-            Class = RealTimeState
-            +Threads = {
-                Class = ReferenceContainer
-                +Thread1 = {
-                    Class = RealTimeThread
-                    CPUs = 0x2
-                    Functions = {GAMTest}
-                }
-            }
-        }        
-    }
-    +Scheduler = {
-        Class = GAMScheduler
-        TimingDataSource = Timings
-    }
+  }
 }

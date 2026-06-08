@@ -1,1 +1,23 @@
-Class = RealTimeThread
+package EXAMPLES.EXTENDED
+var NumChannels: int = 4
+var EnableLogging: bool = true
+let SampleRate: float64 = 1000.0
+
+$App = {
+  Class = RealTimeApplication
+  +Functions = {
+    Class = ReferenceContainer
+    if @EnableLogging
+      +GAM = {
+        Class = IOGAM
+        InputSignals = {
+          ADC::Input1: uint32[8]
+          ADC::Input2: float32
+        }
+        OutputSignals = {
+          DAC::Output1: int16 as Out1 = { Gain = 2.5 }
+        }
+      }
+    end
+  }
+}

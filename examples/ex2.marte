@@ -1,1 +1,11 @@
-cast = (uint32)10000
+var Mode: "A" | "B" | "C" = "A"
+
+if (@Mode == "A")
+  +ConfigA = { Class = ConfigA }
+else if (@Mode == "B")
+  +ConfigB = { Class = ConfigB }
+else if (@Mode == "C")
+  +ConfigC = { Class = ConfigC }
+else
+  +DefaultConfig = { Class = Default }
+end

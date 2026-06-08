@@ -1,185 +1,245 @@
+/// <reference types="tree-sitter-cli/dsl" />
+// @ts-check
+
 module.exports = grammar({
   name: 'marte',
 
   extras: $ => [
-    /\s/,      // matches any whitespace character
+    /\s/,
     $.comment,
   ],
-  
+
+  conflicts: $ => [
+    [$.type_expression, $.primary],
+    [$.array_literal, $.subnode],
+  ],
+
+  word: $ => $.identifier,
+
   rules: {
-    cdb: $ => repeat1($.expression),
-
-    expression: $ => choice(
-      $.exp_var,
-      $.exp_cast,
-      $.exp_cast_scalar,
-      $.exp_block,
-    ),
-
-    exp_var: $ => seq(
-      $.identifier,
-      $.assign,
-      $.variable,
-    ),
-
-    exp_cast: $ => seq(
-      $.identifier,
-      $.assign,
-      $.opar,
-      $.string,
-      $.cpar,
-      $.variable,
-    ),
-
-    exp_cast_scalar: $ => seq(
-      $.identifier,
-      $.assign,
-      $.opar,
-      $.string,
-      $.vbar,
-      $.scalar,
-      $.cpar,
-    ),
-
-    exp_block: $ => seq(
-      $.identifier,
-      $.assign,
-      $.block,
-    ),
-
-    variable: $ => choice(
-      $.scalar,
-      $.vector,
-      $.matrix,
-    ),
-
-    scalar: $ => choice(
-      $.string,
-      $.number,
-    ),
-
-    vector: $ => seq(
-      $.obrace,
-      repeat1(
-        seq(
-          $.scalar,
-          optional($.comma),
-        ),
-      ),
-      $.cbrace,
-    ),
-
-    matrix: $ => seq(
-      $.obrace,
-      repeat1(
-        seq(
-          $.vector,
-          optional($.comma),
-        ),
-      ),
-      $.cbrace,
-    ),
-
-    block: $ => seq(
-      $.obrace,
-      repeat1($.expression),
-      $.cbrace,
-    ),
-
-    identifier: $ => choice(
-      $.app,
-      $.definition,
-      $.property,
-    ),
-
-    string: $ => choice(
-      $.attribute,
-      $.string_literal,
-      $.builtintype,
-    ),
-
-    app: _ => /[$][a-zA-Z][a-zA-Z0-9_.]*/,
-
-    definition: _ => /[+][a-zA-Z][a-zA-Z0-9_.]*/,
-
-    attribute: _ => /[a-zA-Z][a-zA-Z0-9_.]*/,
-
-    property: $ => choice(
-      /[a-zA-Z][a-zA-Z0-9_.]*/,
-      $.marte_common,
-    ),
-
-    marte_common: $ => choice(
-      "InputSignals",
-      "OutputSignals",
-      "Class",
-      "Type",
-      "DataSource",
-      "NumberOfElements",
-      "NumberOfDimensions",
-    ),
-
-    string_literal: $ => seq(
-      '"',
-      repeat(
-        choice(
-          token.immediate(prec(1, /[^\\"\n]+/)),
-          $.escape_sequence,
-        ),
-      ),
-      '"',
-    ),
-
-    escape_sequence: _ => token(
-      prec(
-        1,
-        seq(
-          '\\',
-          choice(
-            /[^xuU]/,
-            /\d{2,3}/,
-            /x[0-9a-fA-F]{2,}/,
-            /u[0-9a-fA-F]{4}/,
-            /U[0-9a-fA-F]{8}/,
-          ),
-        ),
-      ),
-    ),
-
-    number: $ => choice(
-      /\d+(\.\d+)?([eE][+-]?\d+)?/,
-      /0[xX][0-9a-fA-F]+/,
-    ),
-
-    comment: $ => token(
+    // ── TOP LEVEL ──────────────────────────────────────────────────────
+    source_file: $ => repeat1(seq(
+      optional(choice(
+        $.comment,
+        $.docstring,
+        $.pragma,
+      )),
       choice(
-        seq(
-          '//',
-          /.*/,
-        ),
-        seq(
-          '/*',
-          /[^*]*\*+([^/*][^*]*\*+)*/,
-          '/',
-        ),
+        $.package_declaration,
+        $.definition,
+        $.directive,
+        $.comment,
+        $.docstring,
+        $.pragma,
       ),
-    ), 
+    )),
 
-    assign: _ => '=',
+    // ── DEFINITIONS ────────────────────────────────────────────────────
+    definition: $ => choice(
+      $.field,
+      $.object_definition,
+      $.dynamic_object,
+      $.signal_shorthand,
+    ),
 
-    obrace: _ => '{',
+    field: $ => prec(1, seq(
+      field('name', $.identifier),
+      '=',
+      field('value', $.expression),
+    )),
 
-    cbrace: _ => '}',
+    object_definition: $ => seq(
+      field('prefix', choice('+', '$')),
+      field('name', $.identifier),
+      '=',
+      field('body', $.subnode),
+    ),
 
-    opar: _ => '(',
+    // Dynamic node name via expression: "prefix_" .. @var = { ... }
+    dynamic_object: $ => seq(
+      field('name', $.expression),
+      '=',
+      field('body', $.subnode),
+    ),
 
-    cpar: _ => ')',
+    subnode: $ => prec(1, seq(
+      '{',
+      repeat(choice(
+        $.definition,
+        $.directive,
+        $.comment,
+        $.docstring,
+        $.pragma,
+      )),
+      '}',
+    )),
 
-    vbar: _ => '|',
+    // ── SIGNAL SHORTHAND ───────────────────────────────────────────────
+    signal_shorthand: $ => seq(
+      field('datasource', $.identifier),
+      '::',
+      field('signal', $.identifier),
+      optional(seq(
+        ':',
+        field('type', $.type_expression),
+        optional($.array_dimension),
+      )),
+      optional(seq(
+        'as',
+        field('alias', $.identifier),
+      )),
+      optional(seq(
+        '=',
+        field('extra', $.subnode),
+      )),
+    ),
 
-    comma: _ => ',',
+    array_dimension: $ => seq('[', $.expression, ']'),
 
-    builtintype: $ => choice(
+    // ── DIRECTIVES ─────────────────────────────────────────────────────
+    directive: $ => choice(
+      $.var_declaration,
+      $.let_declaration,
+      $.if_block,
+      $.foreach_block,
+      $.template_definition,
+      $.template_use,
+    ),
+
+    // Optional '#' prefix for backward compatibility — inline per rule
+
+    package_declaration: $ => seq(
+      optional('#'),
+      'package',
+      field('uri', $.package_uri),
+    ),
+
+    package_uri: $ => seq(
+      $.identifier,
+      repeat(seq('.', $.identifier)),
+    ),
+
+    var_declaration: $ => seq(
+      optional('#'),
+      'var',
+      field('name', $.identifier),
+      ':',
+      field('type', $.type_expression),
+      optional(seq('=', field('value', $.expression))),
+    ),
+
+    let_declaration: $ => seq(
+      optional('#'),
+      'let',
+      field('name', $.identifier),
+      ':',
+      field('type', $.type_expression),
+      '=',
+      field('value', $.expression),
+    ),
+
+    // ── IF / ELSE IF / ELSE / END ──────────────────────────────────────
+    if_block: $ => seq(
+      optional('#'),
+      'if',
+      field('condition', $.expression),
+      repeat($._block_item),
+      repeat($.else_if_clause),
+      optional($.else_clause),
+      optional('#'),
+      'end',
+    ),
+
+    else_if_clause: $ => seq(
+      'else',
+      'if',
+      field('condition', $.expression),
+      repeat($._block_item),
+    ),
+
+    else_clause: $ => seq(
+      'else',
+      repeat($._block_item),
+    ),
+
+    // ── FOREACH ────────────────────────────────────────────────────────
+    foreach_block: $ => seq(
+      optional('#'),
+      'foreach',
+      optional(seq(field('key', $.identifier), ',')),
+      field('value', $.identifier),
+      'in',
+      field('iterable', $.expression),
+      repeat($._block_item),
+      optional('#'),
+      'end',
+    ),
+
+    // ── TEMPLATE DEFINITION ────────────────────────────────────────────
+    template_definition: $ => seq(
+      optional('#'),
+      'template',
+      field('name', $.identifier),
+      '(',
+      optional($.parameter_list),
+      ')',
+      repeat($._block_item),
+      optional('#'),
+      'end',
+    ),
+
+    _block_item: $ => choice(
+      $.definition,
+      $.comment,
+      $.docstring,
+      $.pragma,
+    ),
+
+    parameter_list: $ => seq(
+      $.parameter,
+      repeat(seq(',', $.parameter)),
+    ),
+
+    parameter: $ => seq(
+      field('name', $.identifier),
+      ':',
+      field('type', $.type_expression),
+      optional(seq('=', field('default', $.expression))),
+    ),
+
+    // ── TEMPLATE USE ───────────────────────────────────────────────────
+    template_use: $ => seq(
+      optional('#'),
+      'use',
+      field('template', $.identifier),
+      field('instance', $.identifier),
+      '(',
+      optional($.argument_list),
+      ')',
+    ),
+
+    argument_list: $ => seq(
+      $.argument,
+      repeat(seq(',', $.argument)),
+    ),
+
+    argument: $ => seq(
+      field('name', $.identifier),
+      '=',
+      field('value', $.expression),
+    ),
+
+    // ── TYPE EXPRESSION ────────────────────────────────────────────────
+    type_expression: $ => seq(
+      choice(
+        $.identifier,
+        $.builtin_type,
+        $.string_literal,
+      ),
+      repeat(seq('|', choice($.identifier, $.builtin_type, $.string_literal))),
+    ),
+
+    builtin_type: $ => token(choice(
       'uint8',
       'uint16',
       'uint32',
@@ -191,6 +251,155 @@ module.exports = grammar({
       'float32',
       'float64',
       'char8',
+      'string',
+      'int',
+      'uint',
+      'float',
+      'bool',
+      'array',
+    )),
+
+    // ── EXPRESSIONS ────────────────────────────────────────────────────
+    expression: $ => $.logical_or,
+
+    logical_or: $ => prec.left(1, seq(
+      $.logical_and,
+      repeat(seq('||', $.logical_and)),
+    )),
+
+    logical_and: $ => prec.left(2, seq(
+      $.comparison,
+      repeat(seq('&&', $.comparison)),
+    )),
+
+    comparison: $ => prec.left(3, seq(
+      $.concat,
+      repeat(seq(
+        choice('<', '>', '<=', '>=', '==', '!='),
+        $.concat,
+      )),
+    )),
+
+    concat: $ => prec.left(4, seq(
+      $.addition,
+      repeat(seq('..', $.addition)),
+    )),
+
+    addition: $ => prec.left(5, seq(
+      $.multiplication,
+      repeat(seq(choice('+', '-'), $.multiplication)),
+    )),
+
+    multiplication: $ => prec.left(6, seq(
+      $.unary,
+      repeat(seq(choice('*', '/', '%'), $.unary)),
+    )),
+
+    unary: $ => choice(
+      seq(choice('-', '!'), $.unary),
+      $.bitwise,
     ),
-  }
+
+    bitwise: $ => prec.left(7, seq(
+      $.primary,
+      repeat(seq(choice('&', '|', '^'), $.primary)),
+    )),
+
+    primary: $ => choice(
+      $.number,
+      $.string_literal,
+      $.boolean_literal,
+      $.variable_reference,
+      $.cast_expression,
+      $.array_literal,
+      $.subnode,
+      $.grouped_expression,
+      $.identifier,
+    ),
+
+    cast_expression: $ => seq(
+      '(',
+      field('type', $.type_expression),
+      ')',
+      field('value', $.expression),
+    ),
+
+    grouped_expression: $ => seq(
+      '(',
+      $.expression,
+      ')',
+    ),
+
+    array_literal: $ => seq(
+      '{',
+      optional(seq(
+        choice($.expression, ','),
+        repeat(choice($.expression, ',')),
+      )),
+      '}',
+    ),
+
+    variable_reference: $ => seq('@', $.identifier),
+
+    // ── LITERALS ───────────────────────────────────────────────────────
+    number: $ => token(choice(
+      /-?\d+(\.\d+)?([eE][+-]?\d+)?/,
+      /0[xX][0-9a-fA-F]+/,
+      /0[bB][01]+/,
+    )),
+
+    string_literal: $ => token(seq(
+      '"',
+      repeat(choice(
+        /[^\\"\n]+/,
+        seq('\\', choice(
+          /[^xuU]/,
+          /\d{2,3}/,
+          /x[0-9a-fA-F]{2,}/,
+          /u[0-9a-fA-F]{4}/,
+          /U[0-9a-fA-F]{8}/,
+        )),
+      )),
+      '"',
+    )),
+
+    boolean_literal: $ => choice('true', 'false'),
+
+    // ── COMMENTS, DOCSTRINGS, PRAGMAS ──────────────────────────────────
+    comment: $ => token(choice(
+      seq('//', /[^#!].*/),
+      seq('/*', /[^*]*\*+([^/*][^*]*\*+)*/, '/'),
+    )),
+
+    docstring: $ => token(seq('//#', /.*/)),
+
+    pragma: $ => token(seq('//!', /.*/)),
+
+    // ── IDENTIFIER ─────────────────────────────────────────────────────
+    identifier: $ => {
+      // Keywords that can also be identifiers
+      const keywords = [
+        'package', 'var', 'let',
+        'if', 'else', 'end',
+        'foreach', 'in',
+        'template', 'use',
+        'as',
+        'true', 'false',
+      ];
+
+      // Known MARTe property names
+      const marteProps = [
+        'Class', 'Type', 'DataSource', 'Alias',
+        'NumberOfElements', 'NumberOfDimensions',
+        'InputSignals', 'OutputSignals',
+        'Functions', 'Data', 'States', 'Scheduler',
+        'DefaultDataSource', 'TimingDataSource',
+      ];
+
+      return token(choice(
+        ...marteProps.map(p => p),
+        /[a-zA-Z_][a-zA-Z0-9_\-.]*/,
+      ));
+    },
+  },
 });
