@@ -245,3 +245,59 @@ let Pi: float64 = 3.14159
                       (bitwise
                         (primary
                           (number))))))))))))))
+
+==================
+CUE type constraint
+==================
+
+var Value: > 0 & < 10 = 1
+
+---
+
+(source_file
+  (directive
+    (var_declaration
+      name: (identifier)
+      type: (type_expression
+        (type_bound
+          (number))
+        (type_bound
+          (number)))
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (number))))))))))))))
+
+==================
+CUE string union type
+==================
+
+var Mode: "A" | "B" = "A"
+
+---
+
+(source_file
+  (directive
+    (var_declaration
+      name: (identifier)
+      type: (type_expression
+        (string_literal)
+        (string_literal))
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (string_literal))))))))))))))

@@ -11,6 +11,7 @@ module.exports = grammar({
 
   conflicts: $ => [
     [$.type_expression, $.primary],
+    [$._type_atom, $.primary],
     [$.array_literal, $.subnode],
   ],
 
@@ -42,25 +43,25 @@ module.exports = grammar({
       $.signal_shorthand,
     ),
 
-    field: $ => prec(1, seq(
+    field: $ => prec(2, seq(
       field('name', $.identifier),
       '=',
       field('value', $.expression),
     )),
 
-    object_definition: $ => seq(
+    object_definition: $ => prec(2, seq(
       field('prefix', choice('+', '$')),
       field('name', $.identifier),
       '=',
       field('body', $.subnode),
-    ),
+    )),
 
     // Dynamic node name via expression: "prefix_" .. @var = { ... }
-    dynamic_object: $ => seq(
+    dynamic_object: $ => prec(1, seq(
       field('name', $.expression),
       '=',
       field('body', $.subnode),
-    ),
+    )),
 
     subnode: $ => prec(1, seq(
       '{',
@@ -231,13 +232,22 @@ module.exports = grammar({
 
     // ── TYPE EXPRESSION ────────────────────────────────────────────────
     type_expression: $ => seq(
-      choice(
-        $.identifier,
-        $.builtin_type,
-        $.string_literal,
-      ),
-      repeat(seq('|', choice($.identifier, $.builtin_type, $.string_literal))),
+      $._type_atom,
+      repeat(seq(choice('|', '&'), $._type_atom)),
     ),
+
+    _type_atom: $ => choice(
+      $.identifier,
+      $.builtin_type,
+      $.string_literal,
+      $.number,
+      $.type_bound,
+    ),
+
+    type_bound: $ => prec(1, seq(
+      choice('<', '>', '<=', '>='),
+      $.number,
+    )),
 
     builtin_type: $ => token(choice(
       'uint8',
