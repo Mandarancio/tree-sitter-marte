@@ -18,14 +18,6 @@
 ; ── Types ───────────────────────────────────────────────────────────────
 (builtin_type) @type.builtin
 
-; ── Objects ─────────────────────────────────────────────────────────────
-(object_definition
-  name: (identifier) @constructor)
-(object_definition
-  prefix: "$" @constructor)
-(object_definition
-  prefix: "+" @constructor)
-
 ; ── Strings ─────────────────────────────────────────────────────────────
 (string_literal) @string
 
@@ -63,6 +55,14 @@
 "<=" @operator
 ">=" @operator
 "!" @operator
+
+; ── Objects ─────────────────────────────────────────────────────────────
+(object_definition
+  name: (identifier) @constructor)
+(object_definition
+  prefix: "$" @constructor)
+(object_definition
+  prefix: "+" @constructor)
 
 ; ── Punctuation ─────────────────────────────────────────────────────────
 ":" @punctuation.delimiter
