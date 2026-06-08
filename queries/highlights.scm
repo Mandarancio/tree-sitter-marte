@@ -20,6 +20,8 @@
 
 ; ── Objects ─────────────────────────────────────────────────────────────
 (object_definition
+  name: (identifier) @constructor)
+(object_definition
   prefix: "$" @constructor)
 (object_definition
   prefix: "+" @constructor)
@@ -29,6 +31,9 @@
 
 ; ── Numbers ─────────────────────────────────────────────────────────────
 (number) @number
+
+; ── Default identifier capture (overridden by specific rules below) ─────
+(identifier) @variable
 
 ; ── Variables ───────────────────────────────────────────────────────────
 (variable_reference) @variable
@@ -108,8 +113,5 @@
 ; ── Type Expressions ────────────────────────────────────────────────────
 (type_expression
   (identifier) @type)
-
-; ── Signal names (common in MARTe) ──────────────────────────────────────
-(identifier) @variable
 
 (dynamic_object) @constructor
