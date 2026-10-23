@@ -589,11 +589,25 @@ module.exports = grammar({
       $.string_literal,
       $.boolean_literal,
       $.variable_reference,
+      $.function_call,
       $.member_expression,
       $.array_literal,
       $.subnode,
       $.grouped_expression,
       $.identifier,
+    )),
+
+    // Builtin iterator functions: enumerate(@list), zip(@a, @b), range(0, 8).
+    // The '@' form (@enumerate(@x)) is accepted by the reference parser too;
+    // both spellings produce the same call.
+    function_call: $ => prec(2, seq(
+      field('function', choice($.identifier, $.variable_reference)),
+      '(',
+      optional(seq(
+        $.expression,
+        repeat(seq(',', $.expression)),
+      )),
+      ')',
     )),
 
     // @var.name, GAM.Sig.replace("a", "b"), @list.append(4).length()

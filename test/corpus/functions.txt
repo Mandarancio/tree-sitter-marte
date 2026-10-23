@@ -1,0 +1,217 @@
+==================
+Builtin function calls
+==================
+
+X = enumerate(@list)
+Y = zip(@names, @channels)
+Z = @range(0, 8, 2)
+
+---
+
+(source_file
+  (definition
+    (field
+      name: (identifier)
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (function_call
+                            function: (identifier)
+                            (expression
+                              (logical_or
+                                (logical_and
+                                  (comparison
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (variable_reference))))))))))))))))))))))))
+  (definition
+    (field
+      name: (identifier)
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (function_call
+                            function: (identifier)
+                            (expression
+                              (logical_or
+                                (logical_and
+                                  (comparison
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (variable_reference)))))))))))
+                            (expression
+                              (logical_or
+                                (logical_and
+                                  (comparison
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (variable_reference))))))))))))))))))))))))
+  (definition
+    (field
+      name: (identifier)
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (function_call
+                            function: (variable_reference)
+                            (expression
+                              (logical_or
+                                (logical_and
+                                  (comparison
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (number)))))))))))
+                            (expression
+                              (logical_or
+                                (logical_and
+                                  (comparison
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (number)))))))))))
+                            (expression
+                              (logical_or
+                                (logical_and
+                                  (comparison
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (number)))))))))))))))))))))))))
+
+==================
+Function calls as foreach iterables
+==================
+
+foreach name, channel in @zip(@names, @channels)
+  ("+Chan_" .. @name) = { Id = @channel }
+end
+
+---
+
+(source_file
+  (directive
+    (foreach_block
+      key: (identifier)
+      value: (identifier)
+      iterable: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (function_call
+                            function: (variable_reference)
+                            (expression
+                              (logical_or
+                                (logical_and
+                                  (comparison
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (variable_reference)))))))))))
+                            (expression
+                              (logical_or
+                                (logical_and
+                                  (comparison
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (variable_reference))))))))))))))))))))))
+      (definition
+        (dynamic_object
+          name: (expression
+            (logical_or
+              (logical_and
+                (comparison
+                  (concat
+                    (addition
+                      (multiplication
+                        (unary
+                          (bitwise
+                            (primary
+                              (grouped_expression
+                                (expression
+                                  (logical_or
+                                    (logical_and
+                                      (comparison
+                                        (concat
+                                          (addition
+                                            (multiplication
+                                              (unary
+                                                (bitwise
+                                                  (primary
+                                                    (string_literal))))))
+                                          (addition
+                                            (multiplication
+                                              (unary
+                                                (bitwise
+                                                  (primary
+                                                    (variable_reference))))))))))))))))))))))
+          body: (subnode
+            (definition
+              (field
+                name: (identifier)
+                value: (expression
+                  (logical_or
+                    (logical_and
+                      (comparison
+                        (concat
+                          (addition
+                            (multiplication
+                              (unary
+                                (bitwise
+                                  (primary
+                                    (variable_reference)))))))))))))))))))

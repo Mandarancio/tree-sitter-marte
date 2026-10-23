@@ -46,6 +46,20 @@
 ; ── Variables ───────────────────────────────────────────────────────────
 (variable_reference) @variable
 
+; ── Builtin functions / calls ───────────────────────────────────────────
+(function_call
+  function: (identifier) @function.call)
+(function_call
+  function: (variable_reference) @function.call)
+((function_call
+   function: (identifier) @function.builtin)
+ (#any-of? @function.builtin
+   "enumerate" "zip" "range" "keys" "values" "len" "reversed" "concat"))
+((function_call
+   function: (variable_reference) @function.builtin)
+ (#any-of? @function.builtin
+   "@enumerate" "@zip" "@range" "@keys" "@values" "@len" "@reversed" "@concat"))
+
 ; ── Member access / method calls ────────────────────────────────────────
 (member_expression
   member: (identifier) @property)
