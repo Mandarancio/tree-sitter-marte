@@ -8,14 +8,24 @@ The parser can be used as a syntax highlighter by any editor using tree-sitter, 
 The release provides the repository source code and a zip file containing the *.wasm* and *.scm* files needed by the editors to implement the syntax highlighting.
 
 ## Syntax
-The [grammar.json](./src/grammar.json) file contains the grammar rules of the MARTe2 configurations files. The following list shows the main keywoard specifically  highlighted by the parser:
-- *Class*, *DataSource*, *InputSignals*, *Type*, *NumberOfDimensions*, *NumberOfElements*
-- The application name, identified by the initial character *$*
-- The object names, identified by the initial character *+*
-- MARTe2 types
-- Strings
-- Numbers
-- Comments
+The [grammar.js](./grammar.js) file (generated into [src/grammar.json](./src/grammar.json)) contains the grammar rules of the MARTe extended configuration language. It covers the full language accepted by the `mdt` reference parser:
+
+- Core definitions: fields, `+`/`$` objects, dynamic `@expr = { … }` names
+- Signal shorthands `DS::Signal : Type[Dim] as Alias = { … }` and the
+  `Name: Type[Dim]` sugar inside `Signals` blocks, plus `from` wiring values
+- Directives: `package`, `var`, `let`, `if` / `else if` / `elseif` / `else` / `end`,
+  `foreach` (one variable, `k v` and `k, v` forms, optional `do`),
+  `template` / `use`, `with json|csv("path") as name begin … end`
+- Pipeline macros (`gam Name { in p: T  out q: T … }`), copy groups
+  (`copy [Name] { a -> b [at n] [: T] … }` with aliases, per-endpoint option
+  blocks and index ranges) and `fuse A with B`
+- `type Name { field: Type [= default] }` declarations and inline struct types
+- Type expressions: unions (`|`), open lists (`[T]`), regex bounds (`=~ "re"`),
+  width-suffixed builtins
+- Expressions: `|| && == != < > <= >= .. + - * / %` unary `- !` bitwise `& | ^`,
+  member access and method calls (`@list.append(4).length()`), conditional
+  splices inside array literals
+- Comments, `//#` docstrings and `//!` pragmas
 
 ## Example
 ![MARTe2 configuration file highligthing example](./images/example.svg)

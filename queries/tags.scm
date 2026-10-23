@@ -39,3 +39,15 @@
 
 ; ── Docstrings attach to next definition ───────────────────────────
 (docstring) @documentation
+
+; ── Pipeline macros ─────────────────────────────────────────────────
+(gam_definition
+  name: (identifier) @name) @definition.function
+
+; ── Type declarations ───────────────────────────────────────────────
+(type_declaration
+  name: (identifier) @name) @definition.interface
+
+; ── Copy groups ─────────────────────────────────────────────────────
+(copy_group
+  name: (identifier) @name) @definition.class

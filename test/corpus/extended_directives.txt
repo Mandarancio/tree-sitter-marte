@@ -1,0 +1,419 @@
+==================
+With block (begin form)
+==================
+
+with json("signals.json") as cfg begin
+  +DS = {
+    Signals = {
+      @cfg.name = { Type = float32 }
+    }
+  }
+end
+
+---
+
+(source_file
+  (directive
+    (with_block
+      format: (identifier)
+      path: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (string_literal)))))))))))
+      binding: (identifier)
+      (definition
+        (object_definition
+          name: (identifier)
+          body: (subnode
+            (definition
+              (field
+                name: (identifier)
+                value: (expression
+                  (logical_or
+                    (logical_and
+                      (comparison
+                        (concat
+                          (addition
+                            (multiplication
+                              (unary
+                                (bitwise
+                                  (primary
+                                    (subnode
+                                      (definition
+                                        (dynamic_object
+                                          name: (expression
+                                            (logical_or
+                                              (logical_and
+                                                (comparison
+                                                  (concat
+                                                    (addition
+                                                      (multiplication
+                                                        (unary
+                                                          (bitwise
+                                                            (primary
+                                                              (member_expression
+                                                                base: (variable_reference)
+                                                                member: (identifier))))))))))))
+                                          body: (subnode
+                                            (definition
+                                              (field
+                                                name: (identifier)
+                                                value: (expression
+                                                  (logical_or
+                                                    (logical_and
+                                                      (comparison
+                                                        (concat
+                                                          (addition
+                                                            (multiplication
+                                                              (unary
+                                                                (bitwise
+                                                                  (primary
+                                                                    (identifier)))))))))))))))))))))))))))))))))))
+
+==================
+With block (brace form)
+==================
+
+with csv("data.csv") as table {
+  N = @table.rows
+}
+end
+
+---
+
+(source_file
+  (directive
+    (with_block
+      format: (identifier)
+      path: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (string_literal)))))))))))
+      binding: (identifier)
+      (definition
+        (field
+          name: (identifier)
+          value: (expression
+            (logical_or
+              (logical_and
+                (comparison
+                  (concat
+                    (addition
+                      (multiplication
+                        (unary
+                          (bitwise
+                            (primary
+                              (member_expression
+                                base: (variable_reference)
+                                member: (identifier)))))))))))))))))
+
+==================
+If with one-word elseif
+==================
+
+if @a
+  A = 1
+#elseif @b
+  B = 2
+#else
+  C = 3
+#end
+
+---
+
+(source_file
+  (directive
+    (if_block
+      condition: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (variable_reference)))))))))))
+      (definition
+        (field
+          name: (identifier)
+          value: (expression
+            (logical_or
+              (logical_and
+                (comparison
+                  (concat
+                    (addition
+                      (multiplication
+                        (unary
+                          (bitwise
+                            (primary
+                              (number)))))))))))))
+      (else_if_clause
+        condition: (expression
+          (logical_or
+            (logical_and
+              (comparison
+                (concat
+                  (addition
+                    (multiplication
+                      (unary
+                        (bitwise
+                          (primary
+                            (variable_reference)))))))))))
+        (definition
+          (field
+            name: (identifier)
+            value: (expression
+              (logical_or
+                (logical_and
+                  (comparison
+                    (concat
+                      (addition
+                        (multiplication
+                          (unary
+                            (bitwise
+                              (primary
+                                (number))))))))))))))
+      (else_clause
+        (definition
+          (field
+            name: (identifier)
+            value: (expression
+              (logical_or
+                (logical_and
+                  (comparison
+                    (concat
+                      (addition
+                        (multiplication
+                          (unary
+                            (bitwise
+                              (primary
+                                (number)))))))))))))))))
+
+==================
+If with two-word else if
+==================
+
+if (@x > 1)
+  A = 1
+else if (@x < 0)
+  B = 2
+end
+
+---
+
+(source_file
+  (directive
+    (if_block
+      condition: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (grouped_expression
+                            (expression
+                              (logical_or
+                                (logical_and
+                                  (comparison
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (variable_reference)))))))
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (number))))))))))))))))))))))
+      (definition
+        (field
+          name: (identifier)
+          value: (expression
+            (logical_or
+              (logical_and
+                (comparison
+                  (concat
+                    (addition
+                      (multiplication
+                        (unary
+                          (bitwise
+                            (primary
+                              (number)))))))))))))
+      (else_if_clause
+        condition: (expression
+          (logical_or
+            (logical_and
+              (comparison
+                (concat
+                  (addition
+                    (multiplication
+                      (unary
+                        (bitwise
+                          (primary
+                            (grouped_expression
+                              (expression
+                                (logical_or
+                                  (logical_and
+                                    (comparison
+                                      (concat
+                                        (addition
+                                          (multiplication
+                                            (unary
+                                              (bitwise
+                                                (primary
+                                                  (variable_reference)))))))
+                                      (concat
+                                        (addition
+                                          (multiplication
+                                            (unary
+                                              (bitwise
+                                                (primary
+                                                  (number))))))))))))))))))))))
+        (definition
+          (field
+            name: (identifier)
+            value: (expression
+              (logical_or
+                (logical_and
+                  (comparison
+                    (concat
+                      (addition
+                        (multiplication
+                          (unary
+                            (bitwise
+                              (primary
+                                (number)))))))))))))))))
+
+==================
+Foreach with comma pair and do
+==================
+
+foreach key, value in @map do
+  @key = { V = @value }
+end
+
+---
+
+(source_file
+  (directive
+    (foreach_block
+      key: (identifier)
+      value: (identifier)
+      iterable: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (variable_reference)))))))))))
+      (definition
+        (dynamic_object
+          name: (expression
+            (logical_or
+              (logical_and
+                (comparison
+                  (concat
+                    (addition
+                      (multiplication
+                        (unary
+                          (bitwise
+                            (primary
+                              (variable_reference)))))))))))
+          body: (subnode
+            (definition
+              (field
+                name: (identifier)
+                value: (expression
+                  (logical_or
+                    (logical_and
+                      (comparison
+                        (concat
+                          (addition
+                            (multiplication
+                              (unary
+                                (bitwise
+                                  (primary
+                                    (variable_reference)))))))))))))))))))
+
+==================
+Foreach with space pair
+==================
+
+foreach i item in @items
+  @item = { V = @i }
+end
+
+---
+
+(source_file
+  (directive
+    (foreach_block
+      key: (identifier)
+      value: (identifier)
+      iterable: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (variable_reference)))))))))))
+      (definition
+        (dynamic_object
+          name: (expression
+            (logical_or
+              (logical_and
+                (comparison
+                  (concat
+                    (addition
+                      (multiplication
+                        (unary
+                          (bitwise
+                            (primary
+                              (variable_reference)))))))))))
+          body: (subnode
+            (definition
+              (field
+                name: (identifier)
+                value: (expression
+                  (logical_or
+                    (logical_and
+                      (comparison
+                        (concat
+                          (addition
+                            (multiplication
+                              (unary
+                                (bitwise
+                                  (primary
+                                    (variable_reference)))))))))))))))))))

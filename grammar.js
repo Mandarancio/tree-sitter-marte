@@ -1,6 +1,31 @@
 /// <reference types="tree-sitter-cli/dsl" />
 // @ts-check
 
+// ─────────────────────────────────────────────────────────────────────────────
+// MARTe Extended Configuration Language — full tree-sitter grammar.
+//
+// Covers everything the reference parser (internal/parser in mdt) accepts:
+//   • core definitions: fields, +/$ objects, dynamic (@expr) object names
+//   • signal shorthands `DS::Signal : Type[Dim] as Alias = { … }`
+//   • signal definition sugar `Name: Type[Dim] [= { … }` in Signals blocks
+//   • `from GAM.Signal [as Alias] [: Type[Dim]]` wiring values
+//   • directives: package / var / let / if–else if–elseif–else–end /
+//     foreach (1 var, "k v" and "k, v" forms, optional `do`) / template / use
+//   • `with json|csv("path") as name [begin|{] … end` structured imports
+//   • pipeline macros `gam Name { in p: T  out q: T  from a -> b  … }`
+//   • copy groups `copy [Name] { (a, b) -> (c, d) [at n] [: T] … }`
+//     with per-endpoint aliases, `{ option = value }` blocks and index ranges
+//   • `fuse A with B`
+//   • `type Name { field: Type [= default], … }` declarations and inline
+//     struct types `var v: { f: int = 0 }`
+//   • type expressions with unions (`|`), open lists (`[T]`), regex bounds
+//     (`=~ "re"`), width-suffixed builtins
+//   • expressions: || && comparisons `..` + - * / % unary - ! bitwise & | ^
+//   • member access and method calls: @list.append(4).length()
+//   • conditional elements inside array literals
+//   • comments //, docstrings //#, pragmas //!
+// ─────────────────────────────────────────────────────────────────────────────
+
 module.exports = grammar({
   name: 'marte',
 
@@ -9,30 +34,48 @@ module.exports = grammar({
     $.comment,
   ],
 
+  word: $ => $.identifier,
+
   conflicts: $ => [
+    // Conflicts below look redundant in isolation but keep the GLR stack
+    // shapes for `#if`/`else` clauses, array splices and copy groups
+    // distinct; tree-sitter reports them as unnecessary only because they
+    // are resolved in combination.
     [$.type_expression, $.primary],
     [$._type_atom, $.primary],
-    [$.array_literal, $.subnode],
+            [$.struct_type, $.array_literal],
+        [$.signal_definition, $.struct_type],
+    // A `{` after a with-binding opens the with body; GLR distinguishes
+    // the body's block items from a nested subnode.
+    [$.subnode, $._block_item],
+    [$.foreach_block],
+    // `copy …` / `fuse …` start both a statement (subnode body) and an
+    // array element; GLR decides from the enclosing context.
+    [$.directive, $.array_literal],
+    // `else` may open a plain else body or continue with the two-word
+    // `else if` clause. The reference parser always reads `else if` as the
+    // clause, and GLR resolves it the same way from what follows.
+    [$.else_if_clause, $.else_clause],
+    // `#if … end` inside braces is a conditional splice in an array
+    // literal or a directive in a subnode body; GLR decides from context.
+    // The else/else-if clause shapes are shared by both forms.
+    [$.if_block, $.array_conditional, $.else_if_clause, $.else_clause],
+    [$.if_block, $.array_conditional],
+    [$.else_clause, $.array_conditional],
+        [$.primary, $.copy_endpoint],
+    [$.copy_endpoint, $.identifier],
+    [$.identifier, $.copy_endpoint, $.primary],
   ],
-
-  word: $ => $.identifier,
 
   rules: {
     // ── TOP LEVEL ──────────────────────────────────────────────────────
-    source_file: $ => repeat1(seq(
-      optional(choice(
-        $.comment,
-        $.docstring,
-        $.pragma,
-      )),
-      choice(
-        $.package_declaration,
-        $.definition,
-        $.directive,
-        $.comment,
-        $.docstring,
-        $.pragma,
-      ),
+    source_file: $ => repeat(choice(
+      $.package_declaration,
+      $.definition,
+      $.directive,
+      $.comment,
+      $.docstring,
+      $.pragma,
     )),
 
     // ── DEFINITIONS ────────────────────────────────────────────────────
@@ -41,6 +84,9 @@ module.exports = grammar({
       $.object_definition,
       $.dynamic_object,
       $.signal_shorthand,
+      $.signal_definition,
+      $.from_field,
+      $.type_declaration,
     ),
 
     field: $ => prec(2, seq(
@@ -56,7 +102,8 @@ module.exports = grammar({
       field('body', $.subnode),
     )),
 
-    // Dynamic node name via expression: "prefix_" .. @var = { ... }
+    // Dynamic node name via expression: "@signal.name = { ... }" or
+    // "prefix_" .. @var = { ... }
     dynamic_object: $ => prec(1, seq(
       field('name', $.expression),
       '=',
@@ -76,6 +123,7 @@ module.exports = grammar({
     )),
 
     // ── SIGNAL SHORTHAND ───────────────────────────────────────────────
+    // DS::Signal [: Type[Dim]] [as Alias] [= { … }]
     signal_shorthand: $ => seq(
       field('datasource', $.identifier),
       '::',
@@ -95,6 +143,32 @@ module.exports = grammar({
       )),
     ),
 
+    // Signal definition sugar inside a Signals block:
+    // Name : Type[Dim] [= { … }]
+    signal_definition: $ => seq(
+      field('name', $.identifier),
+      ':',
+      field('type', $.type_expression),
+      optional($.array_dimension),
+      optional(seq(
+        '=',
+        field('body', $.subnode),
+      )),
+    ),
+
+    // X from GAM.Signal [as Alias] [: Type[Dim]]
+    from_field: $ => prec(1, seq(
+      field('name', $.identifier),
+      'from',
+      field('source', $.copy_endpoint),
+      optional(seq('as', field('alias', $.identifier))),
+      optional(seq(
+        ':',
+        field('type', $.type_expression),
+        optional($.array_dimension),
+      )),
+    )),
+
     array_dimension: $ => seq('[', $.expression, ']'),
 
     // ── DIRECTIVES ─────────────────────────────────────────────────────
@@ -105,9 +179,11 @@ module.exports = grammar({
       $.foreach_block,
       $.template_definition,
       $.template_use,
+      $.with_block,
+      $.gam_definition,
+      $.copy_group,
+      $.fuse_statement,
     ),
-
-    // Optional '#' prefix for backward compatibility — inline per rule
 
     package_declaration: $ => seq(
       optional('#'),
@@ -139,7 +215,7 @@ module.exports = grammar({
       field('value', $.expression),
     ),
 
-    // ── IF / ELSE IF / ELSE / END ──────────────────────────────────────
+    // ── IF / ELSE IF / ELSEIF / ELSE / END ─────────────────────────────
     if_block: $ => seq(
       optional('#'),
       'if',
@@ -151,32 +227,51 @@ module.exports = grammar({
       'end',
     ),
 
-    else_if_clause: $ => seq(
-      'else',
-      'if',
-      field('condition', $.expression),
-      repeat($._block_item),
-    ),
+    // `else if cond` (two words) and `elseif cond` (one word) are both
+    // accepted; each may carry its own leading '#'.
+    // Two forms: two-word `else [ #]if cond` and one-word `[#]elseif cond`.
+    else_if_clause: $ => prec.right(1, choice(
+      seq(
+        'else',
+        optional('#'),
+        'if',
+        field('condition', $.expression),
+        repeat($._block_item),
+      ),
+      seq(
+        optional('#'),
+        'elseif',
+        field('condition', $.expression),
+        repeat($._block_item),
+      ),
+    )),
 
-    else_clause: $ => seq(
+    else_clause: $ => prec.right(1, seq(
+      optional('#'),
       'else',
       repeat($._block_item),
-    ),
+    )),
 
     // ── FOREACH ────────────────────────────────────────────────────────
+    // One identifier binds the element; two bind index and element, either
+    // as "k v" or "k, v". `do` may open the body.
     foreach_block: $ => seq(
       optional('#'),
       'foreach',
-      optional(seq(field('key', $.identifier), ',')),
-      field('value', $.identifier),
+      choice(
+        seq(field('key', $.identifier), ',', field('value', $.identifier)),
+        seq(field('key', $.identifier), field('value', $.identifier)),
+        field('value', $.identifier),
+      ),
       'in',
       field('iterable', $.expression),
+      optional('do'),
       repeat($._block_item),
       optional('#'),
       'end',
     ),
 
-    // ── TEMPLATE DEFINITION ────────────────────────────────────────────
+    // ── TEMPLATE DEFINITION / USE ──────────────────────────────────────
     template_definition: $ => seq(
       optional('#'),
       'template',
@@ -191,6 +286,7 @@ module.exports = grammar({
 
     _block_item: $ => choice(
       $.definition,
+      $.directive,
       $.comment,
       $.docstring,
       $.pragma,
@@ -208,7 +304,6 @@ module.exports = grammar({
       optional(seq('=', field('default', $.expression))),
     ),
 
-    // ── TEMPLATE USE ───────────────────────────────────────────────────
     template_use: $ => seq(
       optional('#'),
       'use',
@@ -230,10 +325,166 @@ module.exports = grammar({
       field('value', $.expression),
     ),
 
-    // ── TYPE EXPRESSION ────────────────────────────────────────────────
+    // ── WITH: STRUCTURED IMPORTS ───────────────────────────────────────
+    // with json("path") as name begin … end
+    // The body may also be opened with '{'.
+    with_block: $ => seq(
+      optional('#'),
+      'with',
+      field('format', $.identifier),
+      '(',
+      field('path', $.expression),
+      ')',
+      'as',
+      field('binding', $.identifier),
+      optional(choice('begin', '{')),
+      // The reference parser skips stray '}' inside directive bodies, so a
+      // brace-opened body may close its brace before the final `end`.
+      repeat(choice($._block_item, '}')),
+      'end',
+    ),
+
+    // ── PIPELINE MACRO ─────────────────────────────────────────────────
+    // gam Name { in p: T  out q: T  from a -> b  <definitions> }
+    gam_definition: $ => seq(
+      'gam',
+      field('name', $.identifier),
+      '{',
+      repeat(choice(
+        $.gam_port,
+        $.from_wiring,
+        $.definition,
+        $.comment,
+        $.docstring,
+        $.pragma,
+      )),
+      '}',
+    ),
+
+    gam_port: $ => seq(
+      field('direction', choice('in', 'out')),
+      field('name', $.identifier),
+      optional(seq(
+        ':',
+        field('type', $.type_expression),
+        optional($.array_dimension),
+      )),
+    ),
+
+    from_wiring: $ => prec(1, seq(
+      'from',
+      field('wiring', alias($.copy_item, $.copy_item)),
+    )),
+
+    // ── COPY GROUPS ────────────────────────────────────────────────────
+    // copy [Name] { item, item, … }
+    copy_group: $ => seq(
+      'copy',
+      optional(field('name', $.identifier)),
+      '{',
+      repeat(choice(
+        $.copy_item,
+        $.pragma,
+        $.comment,
+        $.docstring,
+        ',',
+      )),
+      '}',
+    ),
+
+    // src [as alias] [{opts}] -> dst [as alias] [{opts}] [at n] [: T[Dim]]
+    copy_item: $ => prec.right(1, seq(
+      choice($.copy_endpoint, $.copy_group_members),
+      optional(seq('as', field('src_alias', $.identifier))),
+      optional($.copy_options),
+      '->',
+      choice($.copy_endpoint, $.copy_group_members),
+      optional(seq('as', field('dst_alias', $.identifier))),
+      optional($.copy_options),
+      optional(seq('at', field('index', $.number))),
+      optional(seq(
+        ':',
+        field('type', $.type_expression),
+        optional($.array_dimension),
+      )),
+    )),
+
+    copy_group_members: $ => seq(
+      '(',
+      $.copy_member,
+      repeat(seq(',', $.copy_member)),
+      ')',
+    ),
+
+    copy_member: $ => seq(
+      field('endpoint', $.copy_endpoint),
+      optional(seq('as', field('alias', $.identifier))),
+      optional($.copy_options),
+    ),
+
+    copy_options: $ => seq(
+      '{',
+      repeat(seq(
+        field('name', $.identifier),
+        '=',
+        field('value', $.expression),
+        optional(','),
+      )),
+      '}',
+    ),
+
+    // GAM.Sig, GAM, DS::Sig, GAM[3], GAM[1..4]
+    copy_endpoint: $ => prec(1, choice(
+      seq(
+        field('datasource', $.identifier),
+        '::',
+        field('signal', $.identifier),
+      ),
+      seq(
+        field('object', $.identifier),
+        optional(seq(
+          '[',
+          field('index', $.number),
+          optional(seq('..', field('index_end', $.number))),
+          ']',
+        )),
+      ),
+    )),
+
+    // ── FUSION ─────────────────────────────────────────────────────────
+    fuse_statement: $ => seq(
+      'fuse',
+      field('left', $.identifier),
+      'with',
+      field('right', $.identifier),
+    ),
+
+    // ── TYPE DECLARATIONS ──────────────────────────────────────────────
+    // type Name { field: Type [= default], … }
+    type_declaration: $ => prec(1, seq(
+      'type',
+      field('name', $.identifier),
+      '{',
+      repeat(choice(
+        seq(
+          field('name', $.identifier),
+          ':',
+          field('type', $.type_expression),
+          optional(seq('=', field('default', $.expression))),
+          optional(','),
+        ),
+        $.comment,
+      )),
+      '}',
+    )),
+
+    // ── TYPE EXPRESSIONS ───────────────────────────────────────────────
+    // Union (`|`), intersection (`&`), open lists (`[T]`), inline structs,
+    // regex bounds (`=~ "re"`).
     type_expression: $ => seq(
       $._type_atom,
       repeat(seq(choice('|', '&'), $._type_atom)),
+      optional(seq('=~', field('pattern', $.string_literal))),
     ),
 
     _type_atom: $ => choice(
@@ -242,6 +493,23 @@ module.exports = grammar({
       $.string_literal,
       $.number,
       $.type_bound,
+      $.open_list_type,
+      $.struct_type,
+    ),
+
+    open_list_type: $ => seq('[', $.type_expression, ']'),
+
+    // { field: Type [= default], … }
+    struct_type: $ => seq(
+      '{',
+      repeat(seq(
+        field('name', $.identifier),
+        ':',
+        field('type', $.type_expression),
+        optional(seq('=', field('default', $.expression))),
+        optional(','),
+      )),
+      '}',
     ),
 
     type_bound: $ => prec(1, seq(
@@ -258,6 +526,7 @@ module.exports = grammar({
       'int16',
       'int32',
       'int64',
+      'float16',
       'float32',
       'float64',
       'char8',
@@ -315,24 +584,39 @@ module.exports = grammar({
       repeat(seq(choice('&', '|', '^'), $.primary)),
     )),
 
-    primary: $ => choice(
+    primary: $ => prec(1, choice(
       $.number,
       $.string_literal,
       $.boolean_literal,
       $.variable_reference,
-      $.cast_expression,
+      $.member_expression,
       $.array_literal,
       $.subnode,
       $.grouped_expression,
       $.identifier,
-    ),
+    )),
 
-    cast_expression: $ => seq(
+    // @var.name, GAM.Sig.replace("a", "b"), @list.append(4).length()
+    member_expression: $ => prec.left(12, seq(
+      field('base', choice($.variable_reference, $.identifier)),
+      repeat1(seq(
+        '.',
+        choice(
+          field('member', $.identifier),
+          $.method_call,
+        ),
+      )),
+    )),
+
+    method_call: $ => prec(1, seq(
+      field('method', $.identifier),
       '(',
-      field('type', $.type_expression),
+      optional(seq(
+        $.expression,
+        repeat(seq(',', $.expression)),
+      )),
       ')',
-      field('value', $.expression),
-    ),
+    )),
 
     grouped_expression: $ => seq(
       '(',
@@ -340,16 +624,53 @@ module.exports = grammar({
       ')',
     ),
 
+    // Commas are optional separators; #if/#else blocks splice conditionally.
     array_literal: $ => seq(
       '{',
-      optional(seq(
-        choice($.expression, ','),
-        repeat(choice($.expression, ',')),
+      repeat(choice(
+        $.expression,
+        $.array_conditional,
+        $.copy_group,
+        $.fuse_statement,
+        ',',
       )),
       '}',
     ),
 
-    variable_reference: $ => seq('@', $.identifier),
+    // #if cond <elements> [#else if cond <elements>] [#else <elements>] #end
+    // inside an array literal: the active branch's elements are spliced in.
+    array_conditional: $ => prec(1, seq(
+      optional('#'),
+      'if',
+      field('condition', $.expression),
+      repeat(choice($.expression, ',')),
+      repeat(choice(
+        seq(
+          'else',
+          optional('#'),
+          choice('if', 'elseif'),
+          field('condition', $.expression),
+          repeat(choice($.expression, ',')),
+        ),
+        seq(
+          optional('#'),
+          'elseif',
+          field('condition', $.expression),
+          repeat(choice($.expression, ',')),
+        ),
+      )),
+      optional(seq(
+        optional('#'),
+        'else',
+        repeat(choice($.expression, ',')),
+      )),
+      optional('#'),
+      'end',
+    )),
+
+    // The reference lexer's variable references stop at letters, digits
+    // and underscores: dots after a @name are member accesses.
+    variable_reference: $ => seq('@', field('name', $._var_name)),
 
     // ── LITERALS ───────────────────────────────────────────────────────
     number: $ => token(choice(
@@ -386,30 +707,11 @@ module.exports = grammar({
     pragma: $ => token(seq('//!', /.*/)),
 
     // ── IDENTIFIER ─────────────────────────────────────────────────────
-    identifier: $ => {
-      // Keywords that can also be identifiers
-      const keywords = [
-        'package', 'var', 'let',
-        'if', 'else', 'end',
-        'foreach', 'in',
-        'template', 'use',
-        'as',
-        'true', 'false',
-      ];
+    // Dotted identifiers are one token: field names (Rate.Hz), GAM signal
+    // references (Producer.Out) and package URIs (jada_gyro.App) all lex
+    // as a single identifier, matching the reference lexer.
+    identifier: $ => token(/[a-zA-Z_][a-zA-Z0-9_\-.]*/),
 
-      // Known MARTe property names
-      const marteProps = [
-        'Class', 'Type', 'DataSource', 'Alias',
-        'NumberOfElements', 'NumberOfDimensions',
-        'InputSignals', 'OutputSignals',
-        'Functions', 'Data', 'States', 'Scheduler',
-        'DefaultDataSource', 'TimingDataSource',
-      ];
-
-      return token(choice(
-        ...marteProps.map(p => p),
-        /[a-zA-Z_][a-zA-Z0-9_\-.]*/,
-      ));
-    },
+    _var_name: $ => token(/[a-zA-Z_][a-zA-Z0-9_]*/),
   },
 });

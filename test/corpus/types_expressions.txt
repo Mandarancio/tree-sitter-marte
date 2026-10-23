@@ -1,0 +1,271 @@
+==================
+Inline struct variable
+==================
+
+var hardware: {
+  address: uint16 = 4660
+  port: uint16
+}
+
+---
+
+(source_file
+  (directive
+    (var_declaration
+      name: (identifier)
+      type: (type_expression
+        (struct_type
+          name: (identifier)
+          type: (type_expression
+            (builtin_type))
+          default: (expression
+            (logical_or
+              (logical_and
+                (comparison
+                  (concat
+                    (addition
+                      (multiplication
+                        (unary
+                          (bitwise
+                            (primary
+                              (number)))))))))))
+          name: (identifier)
+          type: (type_expression
+            (builtin_type)))))))
+
+==================
+Type declaration
+==================
+
+type Channel {
+  id: uint32 = 1
+  label: string
+}
+
+---
+
+(source_file
+  (definition
+    (type_declaration
+      name: (identifier)
+      name: (identifier)
+      type: (type_expression
+        (builtin_type))
+      default: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (number)))))))))))
+      name: (identifier)
+      type: (type_expression
+        (builtin_type)))))
+
+==================
+Type expressions: union, open list, regex bound
+==================
+
+var u: string | int
+var l: [float32]
+var r: string =~ "^A.*$"
+
+---
+
+(source_file
+  (directive
+    (var_declaration
+      name: (identifier)
+      type: (type_expression
+        (builtin_type)
+        (builtin_type))))
+  (directive
+    (var_declaration
+      name: (identifier)
+      type: (type_expression
+        (open_list_type
+          (type_expression
+            (builtin_type))))))
+  (directive
+    (var_declaration
+      name: (identifier)
+      type: (type_expression
+        (builtin_type)
+        pattern: (string_literal)))))
+
+==================
+Member access and method calls
+==================
+
+N = @cfg.net.port
+M = @list.append(4).length()
+S = @name.replace("a", "b")
+
+---
+
+(source_file
+  (definition
+    (field
+      name: (identifier)
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (member_expression
+                            base: (variable_reference)
+                            member: (identifier))))))))))))))
+  (definition
+    (field
+      name: (identifier)
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (member_expression
+                            base: (variable_reference)
+                            (method_call
+                              method: (identifier)
+                              (expression
+                                (logical_or
+                                  (logical_and
+                                    (comparison
+                                      (concat
+                                        (addition
+                                          (multiplication
+                                            (unary
+                                              (bitwise
+                                                (primary
+                                                  (number))))))))))))
+                            (method_call
+                              method: (identifier)))))))))))))))
+  (definition
+    (field
+      name: (identifier)
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (member_expression
+                            base: (variable_reference)
+                            (method_call
+                              method: (identifier)
+                              (expression
+                                (logical_or
+                                  (logical_and
+                                    (comparison
+                                      (concat
+                                        (addition
+                                          (multiplication
+                                            (unary
+                                              (bitwise
+                                                (primary
+                                                  (string_literal)))))))))))
+                              (expression
+                                (logical_or
+                                  (logical_and
+                                    (comparison
+                                      (concat
+                                        (addition
+                                          (multiplication
+                                            (unary
+                                              (bitwise
+                                                (primary
+                                                  (string_literal))))))))))))))))))))))))))
+
+==================
+Conditional array elements
+==================
+
+Functions = {
+  AcqReader,
+  if @udp
+    UdpTap,
+  else
+    TcpTap,
+  end
+}
+
+---
+
+(source_file
+  (definition
+    (field
+      name: (identifier)
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (array_literal
+                            (expression
+                              (logical_or
+                                (logical_and
+                                  (comparison
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (identifier)))))))))))
+                            (array_conditional
+                              condition: (expression
+                                (logical_or
+                                  (logical_and
+                                    (comparison
+                                      (concat
+                                        (addition
+                                          (multiplication
+                                            (unary
+                                              (bitwise
+                                                (primary
+                                                  (variable_reference)))))))))))
+                              (expression
+                                (logical_or
+                                  (logical_and
+                                    (comparison
+                                      (concat
+                                        (addition
+                                          (multiplication
+                                            (unary
+                                              (bitwise
+                                                (primary
+                                                  (identifier)))))))))))
+                              (expression
+                                (logical_or
+                                  (logical_and
+                                    (comparison
+                                      (concat
+                                        (addition
+                                          (multiplication
+                                            (unary
+                                              (bitwise
+                                                (primary
+                                                  (identifier))))))))))))))))))))))))))

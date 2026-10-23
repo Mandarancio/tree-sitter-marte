@@ -3,13 +3,25 @@
 "var" @keyword
 "let" @keyword
 "if" @keyword.conditional
+"elseif" @keyword.conditional
 "else" @keyword.conditional
 "end" @keyword
 "foreach" @keyword.repeat
 "in" @keyword
+"do" @keyword.repeat
 "template" @keyword
 "use" @keyword
 "as" @keyword
+"with" @keyword
+"begin" @keyword
+"type" @keyword
+"from" @keyword
+"at" @keyword
+"fuse" @keyword
+"gam" @keyword
+"copy" @keyword
+"in" @keyword
+"out" @keyword
 
 ; ── Boolean ─────────────────────────────────────────────────────────────
 "true" @boolean
@@ -18,6 +30,9 @@
 ; ── Types ───────────────────────────────────────────────────────────────
 (builtin_type) @type.builtin
 (type_bound) @type
+(open_list_type "[" @type.builtin)
+(open_list_type "]" @type.builtin)
+"=~" @operator
 
 ; ── Strings ─────────────────────────────────────────────────────────────
 (string_literal) @string
@@ -30,6 +45,43 @@
 
 ; ── Variables ───────────────────────────────────────────────────────────
 (variable_reference) @variable
+
+; ── Member access / method calls ────────────────────────────────────────
+(member_expression
+  member: (identifier) @property)
+(method_call
+  method: (identifier) @method.call)
+
+; ── Signal syntax ───────────────────────────────────────────────────────
+(signal_shorthand
+  datasource: (identifier) @namespace
+  signal: (identifier) @variable.member
+  alias: (identifier) @variable)
+(signal_definition
+  name: (identifier) @variable.member)
+"::" @punctuation.special
+
+; ── Copy groups ─────────────────────────────────────────────────────────
+(copy_group
+  name: (identifier) @type)
+(copy_endpoint
+  datasource: (identifier) @namespace)
+"->" @operator
+(copy_options
+  name: (identifier) @property)
+
+; ── Pipeline macros ─────────────────────────────────────────────────────
+(gam_definition
+  name: (identifier) @type)
+(gam_port
+  direction: (["in" "out"]) @keyword.modifier
+  name: (identifier) @property)
+
+; ── Struct types ────────────────────────────────────────────────────────
+(struct_type
+  name: (identifier) @property)
+(type_declaration
+  name: (identifier) @type)
 
 ; ── Comments ────────────────────────────────────────────────────────────
 (comment) @comment
@@ -49,70 +101,17 @@
 "||" @operator
 "&&" @operator
 ".." @operator
-"==" @operator
-"!=" @operator
 "<" @operator
 ">" @operator
 "<=" @operator
 ">=" @operator
+"==" @operator
+"!=" @operator
 "!" @operator
 
-; ── Objects ─────────────────────────────────────────────────────────────
-(object_definition
-  name: (identifier) @constructor)
-(object_definition
-  prefix: "$" @constructor)
-(object_definition
-  prefix: "+" @constructor)
-
 ; ── Punctuation ─────────────────────────────────────────────────────────
-":" @punctuation.delimiter
-"::" @punctuation.delimiter
-"," @punctuation.delimiter
-"." @punctuation.delimiter
-"{" @punctuation.bracket
-"}" @punctuation.bracket
 "(" @punctuation.bracket
 ")" @punctuation.bracket
 "[" @punctuation.bracket
 "]" @punctuation.bracket
-
-; ── Templates ───────────────────────────────────────────────────────────
-(template_definition
-  name: (identifier) @function)
-(template_use
-  template: (identifier) @function)
-(template_use
-  instance: (identifier) @variable)
-
-; ── Signal Shorthand ────────────────────────────────────────────────────
-(signal_shorthand
-  datasource: (identifier) @namespace)
-(signal_shorthand
-  signal: (identifier) @variable)
-
-; ── Variables / Constants ───────────────────────────────────────────────
-(var_declaration
-  name: (identifier) @variable)
-(let_declaration
-  name: (identifier) @constant)
-
-; ── Package ─────────────────────────────────────────────────────────────
-(package_declaration
-  uri: (package_uri) @namespace)
-
-; ── Fields ──────────────────────────────────────────────────────────────
-(field
-  name: (identifier) @property)
-
-; ── Parameters / Arguments ──────────────────────────────────────────────
-(parameter
-  name: (identifier) @variable.parameter)
-(argument
-  name: (identifier) @variable.parameter)
-
-; ── Type Expressions ────────────────────────────────────────────────────
-(type_expression
-  (identifier) @type)
-
-(dynamic_object) @constructor
+"," @punctuation.delimiter

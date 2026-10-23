@@ -34,8 +34,7 @@ end
                                           (unary
                                             (bitwise
                                               (primary
-                                                (variable_reference
-                                                  (identifier))))))))
+                                                (variable_reference)))))))
                                     (concat
                                       (addition
                                         (multiplication
@@ -105,8 +104,7 @@ end
                     (unary
                       (bitwise
                         (primary
-                          (variable_reference
-                            (identifier))))))))))))
+                          (variable_reference)))))))))))
       (definition
         (object_definition
           name: (identifier)
@@ -124,8 +122,7 @@ end
                               (unary
                                 (bitwise
                                   (primary
-                                    (variable_reference
-                                      (identifier))))))))))))))))))))
+                                    (variable_reference)))))))))))))))))))
 
 ==================
 Template definition
@@ -178,8 +175,7 @@ end
                               (unary
                                 (bitwise
                                   (primary
-                                    (variable_reference
-                                      (identifier))))))))))))))))))))
+                                    (variable_reference)))))))))))))))))))
 
 ==================
 Package declaration

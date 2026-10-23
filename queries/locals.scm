@@ -19,8 +19,7 @@
   name: (identifier) @local.definition)
 
 ; ── Variable references: point back to definitions ─────────────────
-(variable_reference
-  (identifier) @local.reference)
+(variable_reference) @local.reference
 
 ; ── Scope blocks for locals ────────────────────────────────────────
 ; (file-level variables are global; foreach/template create scopes)

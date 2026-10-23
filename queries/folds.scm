@@ -4,6 +4,9 @@
 (else_clause) @fold
 (foreach_block) @fold
 (template_definition) @fold
+(with_block) @fold
+(gam_definition) @fold
+(copy_group) @fold
 
 ; ── Fold subnodes and array literals ───────────────────────────────
 (subnode) @fold

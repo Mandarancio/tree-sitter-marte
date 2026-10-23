@@ -1,0 +1,145 @@
+==================
+Copy group with endpoints and options
+==================
+
+copy Links {
+  DDB::A -> OUT::C
+  (DDB::A, DDB::B) -> (OUT::C, OUT::D)
+  Producer.Out as In -> Consumer.In { Frequency = 100 } at 3 : float32[2]
+  GAM[1..4] -> OUT::Sum
+}
+
+---
+
+(source_file
+  (directive
+    (copy_group
+      name: (identifier)
+      (copy_item
+        (copy_endpoint
+          datasource: (identifier)
+          signal: (identifier))
+        (copy_endpoint
+          datasource: (identifier)
+          signal: (identifier)))
+      (copy_item
+        (copy_group_members
+          (copy_member
+            endpoint: (copy_endpoint
+              datasource: (identifier)
+              signal: (identifier)))
+          (copy_member
+            endpoint: (copy_endpoint
+              datasource: (identifier)
+              signal: (identifier))))
+        (copy_group_members
+          (copy_member
+            endpoint: (copy_endpoint
+              datasource: (identifier)
+              signal: (identifier)))
+          (copy_member
+            endpoint: (copy_endpoint
+              datasource: (identifier)
+              signal: (identifier)))))
+      (copy_item
+        (copy_endpoint
+          object: (identifier))
+        src_alias: (identifier)
+        (copy_endpoint
+          object: (identifier))
+        (copy_options
+          name: (identifier)
+          value: (expression
+            (logical_or
+              (logical_and
+                (comparison
+                  (concat
+                    (addition
+                      (multiplication
+                        (unary
+                          (bitwise
+                            (primary
+                              (number))))))))))))
+        index: (number)
+        type: (type_expression
+          (builtin_type))
+        (array_dimension
+          (expression
+            (logical_or
+              (logical_and
+                (comparison
+                  (concat
+                    (addition
+                      (multiplication
+                        (unary
+                          (bitwise
+                            (primary
+                              (number)))))))))))))
+      (copy_item
+        (copy_endpoint
+          object: (identifier)
+          index: (number)
+          index_end: (number))
+        (copy_endpoint
+          datasource: (identifier)
+          signal: (identifier))))))
+
+==================
+Fuse statement
+==================
+
+fuse GAMOne with GAMTwo
+
+---
+
+(source_file
+  (directive
+    (fuse_statement
+      left: (identifier)
+      right: (identifier))))
+
+==================
+Pipeline macro
+==================
+
+gam Preprocess {
+  in Raw: uint32
+  out Clean: float32
+  from Raw -> Clean
+  Scale = 2
+}
+
+---
+
+(source_file
+  (directive
+    (gam_definition
+      name: (identifier)
+      (gam_port
+        name: (identifier)
+        type: (type_expression
+          (builtin_type)))
+      (gam_port
+        name: (identifier)
+        type: (type_expression
+          (builtin_type)))
+      (from_wiring
+        wiring: (copy_item
+          (copy_endpoint
+            object: (identifier))
+          (copy_endpoint
+            object: (identifier))))
+      (definition
+        (field
+          name: (identifier)
+          value: (expression
+            (logical_or
+              (logical_and
+                (comparison
+                  (concat
+                    (addition
+                      (multiplication
+                        (unary
+                          (bitwise
+                            (primary
+                              (number))))))))))))))))

@@ -1,0 +1,191 @@
+==================
+Signal definition sugar
+==================
+
++DS = {
+  Class = GAMDataSource
+  Signals = {
+    T: uint32
+    F: float32[4]
+    G: int16 = { Gain = 2.5 }
+  }
+}
+
+---
+
+(source_file
+  (definition
+    (object_definition
+      name: (identifier)
+      body: (subnode
+        (definition
+          (field
+            name: (identifier)
+            value: (expression
+              (logical_or
+                (logical_and
+                  (comparison
+                    (concat
+                      (addition
+                        (multiplication
+                          (unary
+                            (bitwise
+                              (primary
+                                (identifier)))))))))))))
+        (definition
+          (field
+            name: (identifier)
+            value: (expression
+              (logical_or
+                (logical_and
+                  (comparison
+                    (concat
+                      (addition
+                        (multiplication
+                          (unary
+                            (bitwise
+                              (primary
+                                (subnode
+                                  (definition
+                                    (signal_definition
+                                      name: (identifier)
+                                      type: (type_expression
+                                        (builtin_type))))
+                                  (definition
+                                    (signal_definition
+                                      name: (identifier)
+                                      type: (type_expression
+                                        (builtin_type))
+                                      (array_dimension
+                                        (expression
+                                          (logical_or
+                                            (logical_and
+                                              (comparison
+                                                (concat
+                                                  (addition
+                                                    (multiplication
+                                                      (unary
+                                                        (bitwise
+                                                          (primary
+                                                            (number))))))))))))))
+                                  (definition
+                                    (signal_definition
+                                      name: (identifier)
+                                      type: (type_expression
+                                        (builtin_type))
+                                      body: (subnode
+                                        (definition
+                                          (field
+                                            name: (identifier)
+                                            value: (expression
+                                              (logical_or
+                                                (logical_and
+                                                  (comparison
+                                                    (concat
+                                                      (addition
+                                                        (multiplication
+                                                          (unary
+                                                            (bitwise
+                                                              (primary
+                                                                (number)))))))))))))))))))))))))))))))))
+
+==================
+Signal shorthand with type and dimension
+==================
+
+InputSignals = {
+  ADC::Input1: uint32[8]
+  ADC::Input2: float32 as Out1 = { Scale = 1 }
+}
+
+---
+
+(source_file
+  (definition
+    (field
+      name: (identifier)
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (subnode
+                            (definition
+                              (signal_shorthand
+                                datasource: (identifier)
+                                signal: (identifier)
+                                type: (type_expression
+                                  (builtin_type))
+                                (array_dimension
+                                  (expression
+                                    (logical_or
+                                      (logical_and
+                                        (comparison
+                                          (concat
+                                            (addition
+                                              (multiplication
+                                                (unary
+                                                  (bitwise
+                                                    (primary
+                                                      (number))))))))))))))
+                            (definition
+                              (signal_shorthand
+                                datasource: (identifier)
+                                signal: (identifier)
+                                type: (type_expression
+                                  (builtin_type))
+                                alias: (identifier)
+                                extra: (subnode
+                                  (definition
+                                    (field
+                                      name: (identifier)
+                                      value: (expression
+                                        (logical_or
+                                          (logical_and
+                                            (comparison
+                                              (concat
+                                                (addition
+                                                  (multiplication
+                                                    (unary
+                                                      (bitwise
+                                                        (primary
+                                                          (number))))))))))))))))))))))))))))))
+
+==================
+From wiring
+==================
+
+Signals = {
+  X from GAM.Out as Alias: float32
+}
+
+---
+
+(source_file
+  (definition
+    (field
+      name: (identifier)
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (subnode
+                            (definition
+                              (from_field
+                                name: (identifier)
+                                source: (copy_endpoint
+                                  object: (identifier))
+                                alias: (identifier)
+                                type: (type_expression
+                                  (builtin_type))))))))))))))))))
