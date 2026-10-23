@@ -14,6 +14,17 @@
 (foreach_block
   key: (identifier) @local.definition)
 
+; ── List comprehension loop variables ──────────────────────────────
+(list_comprehension
+  key: (identifier) @local.definition)
+
+(list_comprehension
+  value_var: (identifier) @local.definition)
+
+; ── `with … as name` binding ───────────────────────────────────────
+(with_block
+  binding: (identifier) @local.definition)
+
 ; ── Template parameters ────────────────────────────────────────────
 (parameter
   name: (identifier) @local.definition)
@@ -25,3 +36,5 @@
 ; (file-level variables are global; foreach/template create scopes)
 (foreach_block) @local.scope
 (template_definition) @local.scope
+(with_block) @local.scope
+(list_comprehension) @local.scope

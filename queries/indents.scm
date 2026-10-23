@@ -26,6 +26,18 @@
   "template" @branch
   (_) @indent) @branch
 
+(with_block
+  "with" @branch
+  (_) @indent) @branch
+
+(gam_definition
+  "gam" @branch
+  (_) @indent) @branch
+
+(copy_group
+  "copy" @branch
+  (_) @indent) @branch
+
 ; ── Dedent on end keywords ─────────────────────────────────────────
 "end" @dedent
 

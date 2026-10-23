@@ -44,6 +44,10 @@
 (gam_definition
   name: (identifier) @name) @definition.function
 
+; ── with … as name bindings ─────────────────────────────────────────
+(with_block
+  binding: (identifier) @name) @definition.variable
+
 ; ── Type declarations ───────────────────────────────────────────────
 (type_declaration
   name: (identifier) @name) @definition.interface
