@@ -7,7 +7,6 @@
 "else" @keyword.conditional
 "end" @keyword
 "foreach" @keyword.repeat
-"in" @keyword
 "do" @keyword.repeat
 "template" @keyword
 "use" @keyword
@@ -20,7 +19,6 @@
 "fuse" @keyword
 "gam" @keyword
 "copy" @keyword
-"in" @keyword
 "out" @keyword
 
 ; ── Boolean ─────────────────────────────────────────────────────────────
@@ -45,6 +43,11 @@
 
 ; ── Variables ───────────────────────────────────────────────────────────
 (variable_reference) @variable
+
+; ── Build-time assertions ───────────────────────────────────────────────
+(assert_statement "assert" @keyword)
+(assert_statement
+  message: (expression) @string.special)
 
 ; ── Builtin functions / calls ───────────────────────────────────────────
 (function_call
@@ -122,6 +125,9 @@
 "==" @operator
 "!=" @operator
 "!" @operator
+"in" @operator
+(foreach_block "in" @keyword)
+"=~" @operator
 
 ; ── Punctuation ─────────────────────────────────────────────────────────
 "(" @punctuation.bracket

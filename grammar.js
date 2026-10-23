@@ -87,6 +87,16 @@ module.exports = grammar({
       $.signal_definition,
       $.from_field,
       $.type_declaration,
+      $.assert_statement,
+    ),
+
+    // Build-time assertion: assert(condition, "message").
+    assert_statement: $ => seq(
+      'assert',
+      '(',
+      field('condition', $.expression),
+      optional(seq(',', field('message', $.expression))),
+      ')',
     ),
 
     field: $ => prec(2, seq(
@@ -554,7 +564,7 @@ module.exports = grammar({
     comparison: $ => prec.left(3, seq(
       $.concat,
       repeat(seq(
-        choice('<', '>', '<=', '>=', '==', '!='),
+        choice('<', '>', '<=', '>=', '==', '!=', 'in'),
         $.concat,
       )),
     )),

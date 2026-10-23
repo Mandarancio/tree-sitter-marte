@@ -124,6 +124,32 @@
     }
   },
   {
+    "type": "assert_statement",
+    "named": true,
+    "fields": {
+      "condition": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      },
+      "message": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "bitwise",
     "named": true,
     "fields": {},
@@ -420,6 +446,10 @@
       "multiple": false,
       "required": true,
       "types": [
+        {
+          "type": "assert_statement",
+          "named": true
+        },
         {
           "type": "dynamic_object",
           "named": true
@@ -1980,6 +2010,10 @@
   },
   {
     "type": "as",
+    "named": false
+  },
+  {
+    "type": "assert",
     "named": false
   },
   {

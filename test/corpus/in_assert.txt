@@ -1,0 +1,139 @@
+==================
+in operator
+==================
+
+Has = "AI0" in @names
+Missing = "ZZ" in @names
+Key = "k1" in @map
+
+---
+
+(source_file
+  (definition
+    (field
+      name: (identifier)
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (string_literal)))))))
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (variable_reference)))))))))))))
+  (definition
+    (field
+      name: (identifier)
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (string_literal)))))))
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (variable_reference)))))))))))))
+  (definition
+    (field
+      name: (identifier)
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (string_literal)))))))
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (variable_reference))))))))))))))
+
+==================
+assert statement
+==================
+
+assert(@variant == "A", "variant must be A")
+assert(@names.length() > 0)
+
+---
+
+(source_file
+  (definition
+    (assert_statement
+      condition: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (variable_reference)))))))
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (string_literal)))))))))))
+      message: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (string_literal)))))))))))))
+  (definition
+    (assert_statement
+      condition: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (member_expression
+                            base: (variable_reference)
+                            (method_call
+                              method: (identifier)))))))))
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (number))))))))))))))
