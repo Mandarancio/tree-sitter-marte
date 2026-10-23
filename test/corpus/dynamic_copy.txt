@@ -1,0 +1,38 @@
+==================
+Dynamic copy endpoints
+==================
+
+copy ReadADC {
+  FastAdcDataSource::@signal.name { Samples = @n } -> DDB4::@signal.name
+}
+
+---
+
+(source_file
+  (directive
+    (copy_group
+      name: (identifier)
+      (copy_item
+        (copy_endpoint
+          datasource: (identifier)
+          dynamic_signal: (member_expression
+            base: (variable_reference)
+            member: (identifier)))
+        (copy_options
+          name: (identifier)
+          value: (expression
+            (logical_or
+              (logical_and
+                (comparison
+                  (concat
+                    (addition
+                      (multiplication
+                        (unary
+                          (bitwise
+                            (primary
+                              (variable_reference))))))))))))
+        (copy_endpoint
+          datasource: (identifier)
+          dynamic_signal: (member_expression
+            base: (variable_reference)
+            member: (identifier)))))))

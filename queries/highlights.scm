@@ -127,6 +127,10 @@
 "!" @operator
 "in" @operator
 (foreach_block "in" @keyword)
+(list_comprehension
+  "for" @keyword.repeat
+  "in" @keyword
+  "if" @keyword.conditional)
 "=~" @operator
 
 ; ── Punctuation ─────────────────────────────────────────────────────────

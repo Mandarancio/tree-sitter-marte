@@ -1,0 +1,145 @@
+==================
+List comprehension
+==================
+
+Names = { @sig.name for sig in @cfg.signals }
+Big = { @n for n in @nums if @n > 1 }
+Indexed = { @i for i, n in @nums }
+
+---
+
+(source_file
+  (definition
+    (field
+      name: (identifier)
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (list_comprehension
+                            value: (expression
+                              (logical_or
+                                (logical_and
+                                  (comparison
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (member_expression
+                                                  base: (variable_reference)
+                                                  member: (identifier))))))))))))
+                            key: (identifier)
+                            iterable: (expression
+                              (logical_or
+                                (logical_and
+                                  (comparison
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (member_expression
+                                                  base: (variable_reference)
+                                                  member: (identifier)))))))))))))))))))))))))
+  (definition
+    (field
+      name: (identifier)
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (list_comprehension
+                            value: (expression
+                              (logical_or
+                                (logical_and
+                                  (comparison
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (variable_reference)))))))))))
+                            key: (identifier)
+                            iterable: (expression
+                              (logical_or
+                                (logical_and
+                                  (comparison
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (variable_reference)))))))))))
+                            filter: (expression
+                              (logical_or
+                                (logical_and
+                                  (comparison
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (variable_reference)))))))
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (number))))))))))))))))))))))))
+  (definition
+    (field
+      name: (identifier)
+      value: (expression
+        (logical_or
+          (logical_and
+            (comparison
+              (concat
+                (addition
+                  (multiplication
+                    (unary
+                      (bitwise
+                        (primary
+                          (list_comprehension
+                            value: (expression
+                              (logical_or
+                                (logical_and
+                                  (comparison
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (variable_reference)))))))))))
+                            key: (identifier)
+                            value_var: (identifier)
+                            iterable: (expression
+                              (logical_or
+                                (logical_and
+                                  (comparison
+                                    (concat
+                                      (addition
+                                        (multiplication
+                                          (unary
+                                            (bitwise
+                                              (primary
+                                                (variable_reference)))))))))))))))))))))))))

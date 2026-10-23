@@ -48,6 +48,9 @@ module.exports = grammar({
     // A `{` after a with-binding opens the with body; GLR distinguishes
     // the body's block items from a nested subnode.
     [$.subnode, $._block_item],
+    [$.struct_literal, $.subnode],
+    [$.struct_literal, $.array_literal],
+    [$.field, $.primary, $.struct_literal],
     [$.foreach_block],
     // `copy …` / `fuse …` start both a statement (subnode body) and an
     // array element; GLR decides from the enclosing context.
@@ -450,6 +453,12 @@ module.exports = grammar({
         '::',
         field('signal', $.identifier),
       ),
+      // Dynamic signal name: `DS::@expr` (evaluated per expansion).
+      seq(
+        field('datasource', $.identifier),
+        '::',
+        field('dynamic_signal', choice($.variable_reference, $.member_expression)),
+      ),
       seq(
         field('object', $.identifier),
         optional(seq(
@@ -602,6 +611,8 @@ module.exports = grammar({
       $.function_call,
       $.member_expression,
       $.array_literal,
+      $.list_comprehension,
+      $.struct_literal,
       $.subnode,
       $.grouped_expression,
       $.identifier,
@@ -658,6 +669,32 @@ module.exports = grammar({
         $.fuse_statement,
         ',',
       )),
+      '}',
+    ),
+
+    // Value-position struct literal: `{ a = 1, b = 2 }` (commas allowed;
+    // the same braces without commas also parse as a subnode).
+    struct_literal: $ => seq(
+      '{',
+      repeat(seq(
+        field('name', $.identifier),
+        '=',
+        field('value', $.expression),
+        optional(','),
+      )),
+      '}',
+    ),
+
+    // { expr for var[, var] in iterable [if cond] }
+    list_comprehension: $ => seq(
+      '{',
+      field('value', $.expression),
+      'for',
+      field('key', $.identifier),
+      optional(seq(',', field('value_var', $.identifier))),
+      'in',
+      field('iterable', $.expression),
+      optional(seq('if', field('filter', $.expression))),
       '}',
     ),
 
